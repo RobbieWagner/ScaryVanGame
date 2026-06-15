@@ -3,12 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace RobbieWagnerGames.ScaryVanGame
 {
     public class ActivityBook : MonoBehaviour
     {
+        [Header("Pages")]
         [SerializeField] private List<ActivityBookPage> pagePrefabs;
+        private List<ActivityBookPage> pageInstances = new List<ActivityBookPage>();
         private int currentPageIndex = 0;
         public int CurrentPageIndex
         {
@@ -18,17 +21,20 @@ namespace RobbieWagnerGames.ScaryVanGame
                 if (value < 0 || value == currentPageIndex || value > pagePrefabs.Count / 2 || pageTurnCo != null || !canFlipPages)
                     return;
 
-				currentPageIndex = value;
                 pageTurnCo = StartCoroutine(TurnPage(currentPageIndex, value));
+				currentPageIndex = value;
             }
         }
 
         [SerializeField] private Canvas leftPageCanvas;
         [SerializeField] private Canvas rightPageCanvas;
 
-        private ActivityBookPage leftPageContent = null;
-        private ActivityBookPage rightPageContent = null;
+        [Header("Manager UI")]
+        [SerializeField] private Canvas bookMarginCanvas;
+        [SerializeField] private Button prevPageButton;
+        [SerializeField] private Button nextPageButton;
 
+        [Header("Animation")]
         [SerializeField] private Animator animator;
 
         #region animator parameters
@@ -48,7 +54,35 @@ namespace RobbieWagnerGames.ScaryVanGame
 
         private void Awake()
         {
+            prevPageButton.onClick.AddListener(TurnPreviousPage);
+            nextPageButton.onClick.AddListener(TurnNextPage);
+
+            InitializeActivityBook();
+
             StartCoroutine(OpenBookCo(new int[] {0,1}, ()=>{canFlipPages = true;}));
+        }
+
+        private void InitializeActivityBook()
+        {
+            // Instantiate page prefabs on the correct page
+            for(int i = 0; i < pagePrefabs.Count; i++)
+            {
+                bool placeOnLeft = i % 2 == 0;
+                Transform parent = placeOnLeft ? leftPageCanvas.transform : rightPageCanvas.transform;
+
+                pageInstances.Add(Instantiate(pagePrefabs[i], parent));
+                pageInstances[i].gameObject.SetActive(false);
+            }
+        }
+
+        private void TurnPreviousPage()
+        {
+            CurrentPageIndex--;
+        }
+
+        private void TurnNextPage()
+        {
+            CurrentPageIndex++;
         }
 
         public void OnOpen()
@@ -65,7 +99,7 @@ namespace RobbieWagnerGames.ScaryVanGame
             OnCloseBook?.Invoke();
         }
 
-        private IEnumerator CloseBookCo(bool closeFromBack)
+        private IEnumerator CloseBookCo(bool closeFromBack, int[] pagesToClose)
         {
             Debug.Log("closing book");
             closeCompleted = false;
@@ -74,24 +108,26 @@ namespace RobbieWagnerGames.ScaryVanGame
 
             yield return new WaitUntil(() => closeCompleted);
 
-            if (rightPageContent != null)
-            {
-                Destroy(rightPageContent.gameObject);
-                rightPageContent = null;
-            }
-            if (leftPageContent != null)
-            {    
-                Destroy(leftPageContent.gameObject);
-                leftPageContent = null;
-            }
+            ActivityBookPage leftPage = pageInstances[pagesToClose[0]];
+            ActivityBookPage rightPage = null;
+            if (pageInstances.Count > pagesToClose[1])
+                rightPage = pageInstances[pagesToClose[1]];
+
+            Debug.Log(leftPage.gameObject.name);
+            leftPage.gameObject.SetActive(false);
+            rightPage?.gameObject.SetActive(false);
         }
 
         private IEnumerator OpenBookCo(int[] pagesToOpen, Action callback = null)
         {
             Debug.Log("opening book");
-            leftPageContent = Instantiate(pagePrefabs[pagesToOpen[0]], leftPageCanvas.transform);
-            if (pagesToOpen.Count() > 1)
-                rightPageContent = Instantiate(pagePrefabs[pagesToOpen[1]], rightPageCanvas.transform);
+            ActivityBookPage leftPage = pageInstances[pagesToOpen[0]];
+            ActivityBookPage rightPage = null;
+            if (pageInstances.Count > pagesToOpen[1])
+                rightPage = pageInstances[pagesToOpen[1]];
+            
+            leftPage.gameObject.SetActive(true);
+            rightPage?.gameObject.SetActive(true);
 
             openCompleted = false;
             animator.SetTrigger(OPEN_TRIGGER);
@@ -100,16 +136,18 @@ namespace RobbieWagnerGames.ScaryVanGame
             callback?.Invoke();
         }
 
-        private IEnumerator TurnPage(int pageFrom, int pageTo)
+        private IEnumerator TurnPage(int indexFrom, int indexTo)
         {
+            int[] pagesToClose = {indexFrom * 2, indexFrom * 2 + 1};
+            int[] pagesToOpen = {indexTo * 2, indexTo * 2 + 1};
+
             Debug.Log("turn page triggered");
-            if (pageFrom >= 0)
+            if (indexFrom >= 0)
             {
-                bool closeFromBack = pageFrom > pageTo ? true : false;
-                yield return CloseBookCo(closeFromBack);
+                bool closeFromBack = indexFrom > indexTo ? true : false;
+                yield return CloseBookCo(closeFromBack, pagesToClose);
             }
 
-            int[] pagesToOpen = {pageTo * 2, pageTo * 2 + 1};
             yield return OpenBookCo(pagesToOpen);
 
             pageTurnCo = null;

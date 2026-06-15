@@ -13,7 +13,7 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Page
-    second: {fileID: 2100000, guid: 09788556be1e19f4f86d5a48b207ee84, type: 2}
+    second: {fileID: 2100000, guid: 15d828a05ac138247b768d0ef3aee0a3, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -45,7 +45,7 @@ ModelImporter:
       takeName: Scene
       internalID: -623603649343465320
       firstFrame: 0
-      lastFrame: 15
+      lastFrame: 17
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -65,7 +65,7 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.6365546
+      - time: 0.78361344
         functionName: OnClosed
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: 4f4f5693d5ca7d64f99d52b260881dcb, type: 3}
@@ -175,7 +175,7 @@ ModelImporter:
       takeName: Scene
       internalID: -3692877260685233286
       firstFrame: 60
-      lastFrame: 75
+      lastFrame: 77
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -195,7 +195,7 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.64713067
+      - time: 0.7773828
         functionName: OnClosed
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: 4f4f5693d5ca7d64f99d52b260881dcb, type: 3}
@@ -260,7 +260,7 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.6386555
+      - time: 0.6428572
         functionName: OnOpen
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: 4f4f5693d5ca7d64f99d52b260881dcb, type: 3}
